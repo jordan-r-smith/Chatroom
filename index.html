@@ -42,42 +42,63 @@
 
   <!-- Page Content -->
   <div class="container">
+    <div class="col-md-6 col-md-offset-3">
 
-    <div class="row">
-      <div class="col-md-12">
-        <h1>WebSockets Client</h1>
+      <div class="row">
+        <div class="col-xs-12">
+          <h1>Code Prompts Chatroom</h1>
+        </div>
       </div>
-    </div>
-    <!-- /.row -->
+      <!-- /.row -->
 
-    <div class="row">
-      <div class="col-md-12">
-        <p id="chatLog"></p>
+      <div class="row">
+        <div class="form-group">
+          <div class="col-xs-6">
+            <input type="text" class="form-control" id="username" placeholder="Username" />
+          </div>
+          <div class="col-xs-6">
+            <button id="connect" class="btn btn-success">Connect</button>
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- /.row -->
+      <!-- /.row -->
 
-    <div class="row">
-      <div class="col-md-12">
-        <input id="text" type="text" />
-        <button id="disconnect">Disconnect</button>
+      <div class="row">
+        <div class="col-xs-12">
+          <p id="chatLog"></p>
+        </div>
       </div>
-    </div>
-    <!-- /.row -->
+      <!-- /.row -->
 
-    <div class="row">
-      <div class="col-md-offset-3 col-md-6 text-center">
-        <footer class="footer">
-          <p>&copy; <a href="https://github.com/jordan-r-smith">Jordan Smith</a></p>
-        </footer>
+      <div class="row">
+        <div class="form-group">
+          <div class="col-xs-6">
+            <input id="text" class="form-control" type="text" placeholder="Send a message..." disabled=""/>
+          </div>
+          <div class="col-xs-6">
+            <button id="send" class="btn btn-primary" disabled="">Send</button>
+            <button id="disconnect" class="btn btn-default" disabled="">Disconnect</button>
+          </div>
+        </div>
       </div>
-    </div>
+      <!-- /.row -->
 
+      <div class="row">
+        <div class="col-xs-offset-3 col-xs-6 text-center">
+          <footer class="footer">
+            <p>&copy; <a href="https://github.com/jordan-r-smith">Jordan Smith</a></p>
+          </footer>
+        </div>
+      </div>
+      <!-- /.row -->
+
+    </div>
+    <!-- /.col -->
   </div>
   <!-- /.container -->
 
   <!-- JQuery -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 
   <!-- Main JavaScript -->
   <script src="js/main.js"></script>
