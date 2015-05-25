@@ -1,0 +1,26 @@
+body {
+  padding-top: 100px;
+  padding-bottom: 50px;
+}
+
+#question {
+  margin-bottom: 50px;
+}
+
+footer {
+  margin-top: 15px;
+}
+
+#chatLog{
+    padding: 5px;
+    border: 1px solid black;
+}
+
+.event {
+    color:#999;
+}
+
+.warning{
+    font-weight:bold;
+    color:#CCC;
+}
