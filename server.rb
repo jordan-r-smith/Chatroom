@@ -1,10 +1,6 @@
 require 'em-websocket'
 require 'json'
 
-#
-# broadcast all ruby related tweets to all connected users!
-#
-
 EventMachine.run {
   @channel = EM::Channel.new
 
@@ -12,6 +8,7 @@ EventMachine.run {
 
     ws.onopen { |handshake|
       sid = @channel.subscribe { |msg| ws.send msg }
+      puts "Connection opened"
 
       username = handshake.query_string.split('=').last
 
@@ -34,6 +31,7 @@ EventMachine.run {
 
       ws.onclose {
         @channel.unsubscribe(sid)
+        puts "Connection closed"
       }
     }
 

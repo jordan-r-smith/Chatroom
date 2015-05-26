@@ -28,125 +28,190 @@ controller.init();
 
 $(document).ready(function() {
 
+  // User has websockets?
   if (!("WebSocket" in window)) {
     $('#chatLog, input, button, #examples').fadeOut("fast");
-    $('<p>Oh no, you need a browser that supports WebSockets. How about <a href="http://www.google.com/chrome">Google Chrome</a>?</p>').appendTo('#container');
+    $('<p>Oh no, you need a browser that supports WebSockets. How about <a href="http://www.google.com/chrome">Google Chrome</a>?</p>').appendTo('#errors');
   } else {
-    //The user has WebSockets
-
+    var socket;
+    
     function connect(username) {
-        var socket;
-        var host = 'ws://localhost:8080/server.rb?username=' + username;
+      var host = 'ws://localhost:8080/server.rb?username=' + username;
 
-        try {
-          var socket = new WebSocket(host);
+      try {
+        socket = new WebSocket(host);
 
-          socket.onopen = function() {
-            //message('<p class="event">Connection Open</p>');
-          }
+        socket.onopen = function() {
+          message('<p class="event">ReadyState: ' + socket.readyState + '</p>');
+        }
 
-          socket.onmessage = function(event) {
-            var msg = JSON.parse(event.data);
-            var timestamp = new Date(msg.timestamp);
-            var time = timestamp.toTimeString().split(' ')[0];
+        socket.onmessage = function(event) {
+          var msg = JSON.parse(event.data);
+          var timestamp = new Date(msg.timestamp);
+          var time = timestamp.toTimeString().split(' ')[0];
 
-            switch (msg.type) {
-              case 'connect':
+          switch (msg.type) {
+            case 'connect':
+              if (username == msg.username) {
+                message('<p class="event">You connected.</p>');
+              } else {
                 message('<p class="event">' + msg.text + '</p>');
-                break;
-              case 'chat':
+              }
+              break;
+            case 'chat':
+              if (username == msg.username) {
+                message('<p class="message"><em class="text-primary">[' + time + '] ' + msg.username + ' ></em> ' + msg.text + '</p>');
+              } else {
                 message('<p class="message"><em>[' + time + '] ' + msg.username + ' ></em> ' + msg.text + '</p>');
-                break;
-            }
-
-            $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
+              }
+              break;
+            case 'disconnect':
+              if (username == msg.username) {
+                message('<p class="event">Disconnected.</p>');
+              } else {
+                message('<p class="event">' + msg.username + ' has disconnected.</p>');
+              }
+              break;
           }
 
-          socket.onclose = function() {
-            message('<p class="event">Disconnected</p>');
-          }
+          $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
+        }
 
+        socket.onclose = function(event) {
+          message('<p class="event">Disconnected.</p>');
+          message('<p class="event">ReadyState: ' + socket.readyState + '</p>');
+          console.log("Closed - code: " + event.code + ", reason: " + event.reason + ", wasClean: " + event.wasClean);
+        }
+
+      } catch (exception) {
+        message('<p class="warning">Error: ' + exception + '</p>');
+      }
+
+      function send(msg) {
+        try {
+          socket.send(msg);
         } catch (exception) {
           message('<p class="warning">Error: ' + exception + '</p>');
         }
 
-        function send() {
-          var username = $('#username').val();
-          var text = $('#text').val();
+        $('#text').val("");
+      }
 
-          if (text == "") {
-            message('<p class="warning">Please enter a message.</p>');
-            return;
-          }
-
-          var msg = {
-            type: 'chat',
-            username: username,
-            text: text
-          }
-
-          try {
-            socket.send(JSON.stringify(msg));
-          } catch (exception) {
-            message('<p class="warning">Error: ' + exception + '</p>');
-          }
-
-          $('#text').val("");
-        }
-
-        function message(msg) {
-          $('#chatLog').append(msg);
-          $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
-        }
-
-        $('#text').keypress(function(event) {
-          if (event.keyCode == '13') {
-            send();
-          }
-        });
-
-        $('#send').click(function() {
-          send();
-        });
-
-        $('#disconnect').click(function() {
+      function close() {
+        try {
           socket.close();
-          $('#username').prop('disabled', false);
-          $('#connect').prop('disabled', false);
+        } catch (exception) {
+          message('<p class="warning">Error: ' + exception + '</p>');
+        }
+      }
 
-          $('#text').prop('disabled', true);
-          $('#send').prop('disabled', true);
-          $('#disconnect').prop('disabled', true);
-        });
+      function message(msg) {
+        $('#chatLog').append(msg);
+        $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
+      }
 
-      } //End connect
+      function chat() {
+        var username = $('#username').val();
+        var text = $('#text').val();
+
+        if (text == "") {
+          message('<p class="warning">Text: ' + text + '</p>');
+          message('<p class="warning">Please enter a message.</p>');
+          return;
+        }
+
+        var msg = {
+          type: 'chat',
+          username: username,
+          text: text
+        }
+
+        msg = JSON.stringify(msg);
+        send(msg);
+      }
+
+      function disconnect() {
+        var username = $('#username').val();
+
+        var msg = {
+          type: 'disconnect',
+          username: username
+        }
+
+        msg = JSON.stringify(msg);
+        send(msg);
+
+        $('#username').prop('disabled', false);
+        $('#connect').prop('disabled', false);
+
+        $('#text').prop('disabled', true);
+        $('#send').prop('disabled', true);
+        $('#disconnect').prop('disabled', true);
+
+        close();
+      }
+
+      // Send a chat message using the Enter key
+      $('#text').keypress(function(event) {
+        if (event.keyCode == '13') {
+          chat();
+        }
+      });
+
+      // Send a chat message using the Send button
+      $('#send').click(function() {
+        chat();
+      });
+
+      $('#disconnect').click(function() {
+        disconnect();
+      });
+
+      window.onbeforeunload = function() {
+        disconnect();
+      }
+
+    }
 
     function login() {
       var username = $('#username').val();
 
       if (username == "") {
-        console.log('Enter a username')
+        $('#username').css({
+          "border": "1px solid red"
+        });
       } else {
-        $('#username').prop('disabled', true);
-        $('#connect').prop('disabled', true);
+        try {
+          $('#username').css({
+            "border": "1px solid #dddddd"
+          });
 
-        $('#text').prop('disabled', false);
-        $('#send').prop('disabled', false);
-        $('#disconnect').prop('disabled', false);
-        connect(username);
+          $('#username').prop('disabled', true);
+          $('#connect').prop('disabled', true);
+
+          $('#text').prop('disabled', false);
+          $('#send').prop('disabled', false);
+          $('#disconnect').prop('disabled', false);
+
+          connect(username);
+        } catch (exception) {
+          console.log('Error: ' + exception);
+        }
       }
-    } //End login
+    }
 
+    // Login using Enter key
     $('#username').keypress(function(event) {
       if (event.keyCode == '13') {
         login();
       }
     });
 
+    // Login using Connect button
     $('#connect').click(function() {
       login();
     });
 
-  } //End else
+  }
 
 });
