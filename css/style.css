@@ -7,7 +7,7 @@ footer {
 }
 #chatLog {
   height: 300px;
-  overflow: scroll;
+  overflow-y: auto;
   margin: 5px 0;
   padding: 5px;
   background-color: #ffffff;
@@ -26,4 +26,8 @@ footer {
 .warning {
   font-weight: bold;
   color: #CCC;
+}
+.message em {
+  font-style: normal;
+  font-weight: bold;
 }

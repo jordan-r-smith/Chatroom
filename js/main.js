@@ -34,37 +34,32 @@ $(document).ready(function() {
   } else {
     //The user has WebSockets
 
-    function connect() {
+    function connect(username) {
         var socket;
-        var host = "ws://localhost:8080/server.rb";
+        var host = 'ws://localhost:8080/server.rb?username=' + username;
 
         try {
           var socket = new WebSocket(host);
 
           socket.onopen = function() {
-            message('<p class="event">Connection Open</p>');
+            //message('<p class="event">Connection Open</p>');
           }
 
           socket.onmessage = function(event) {
             var msg = JSON.parse(event.data);
-            var time = new Date().toLocaleString();
-
-            console.log(msg);
+            var timestamp = new Date(msg.timestamp);
+            var time = timestamp.toTimeString().split(' ')[0];
 
             switch (msg.type) {
               case 'connect':
                 message('<p class="event">' + msg.text + '</p>');
                 break;
-              case 'login':
-                message('<p class="event"><b>User <em>' + msg.username + '</em> signed in at ' + timeStr + '</b></p>');
-                break;
               case 'chat':
-                message('<p class="message">' + msg.username + ': ' + msg.text + '</p>');
+                message('<p class="message"><em>[' + time + '] ' + msg.username + ' ></em> ' + msg.text + '</p>');
                 break;
             }
 
             $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
-
           }
 
           socket.onclose = function() {
@@ -101,6 +96,7 @@ $(document).ready(function() {
 
         function message(msg) {
           $('#chatLog').append(msg);
+          $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
         }
 
         $('#text').keypress(function(event) {
@@ -137,9 +133,9 @@ $(document).ready(function() {
         $('#text').prop('disabled', false);
         $('#send').prop('disabled', false);
         $('#disconnect').prop('disabled', false);
-        connect();
+        connect(username);
       }
-    }
+    } //End login
 
     $('#username').keypress(function(event) {
       if (event.keyCode == '13') {

@@ -10,20 +10,26 @@ EventMachine.run {
 
   EventMachine::WebSocket.start(:host => "127.0.0.1", :port => 8080, :debug => true) do |ws|
 
-    ws.onopen {
+    ws.onopen { |handshake|
       sid = @channel.subscribe { |msg| ws.send msg }
+
+      username = handshake.query_string.split('=').last
 
       msg_hash = {
         type: 'connect',
         id: sid,
-        text: 'Connected!'
+        text: "#{username} connected!",
+        username: username,
+        timestamp: Time.now.to_i * 1000
       }
 
-      #@channel.push "#{sid} connected!"
       @channel.push msg_hash.to_json
 
       ws.onmessage { |msg|
-        @channel.push msg
+        msg_hash = JSON.parse(msg)
+        msg_hash["timestamp"] = Time.now.to_i * 1000
+
+        @channel.push msg_hash.to_json
       }
 
       ws.onclose {
