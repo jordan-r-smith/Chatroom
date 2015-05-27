@@ -28,24 +28,14 @@
 
 <body>
 
-  <!-- Navigation -->
-  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    <div class="container">
-      <!-- Brand and toggle get grouped for better mobile display -->
-      <div class="navbar-header">
-        <a class="navbar-brand" href="">Chatroom</a>
-      </div>
-      <!-- /.navbar-collapse -->
-    </div>
-    <!-- /.container -->
-  </nav>
+
 
   <!-- Page Content -->
   <div class="container">
-    <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-8 col-md-offset-2">
 
       <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-10">
           <h1>Code Prompts Chatroom</h1>
         </div>
       </div>
@@ -53,10 +43,10 @@
 
       <div class="row">
         <div class="form-group">
-          <div class="col-xs-6">
+          <div class="col-xs-4">
             <input type="text" class="form-control" id="username" placeholder="Username" />
           </div>
-          <div class="col-xs-6">
+          <div class="col-xs-4">
             <button id="connect" class="btn btn-success">Connect</button>
           </div>
         </div>
@@ -64,19 +54,22 @@
       <!-- /.row -->
 
       <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-8">
           <p id="chatLog"></p>
           <p id="errors"></p>
+        </div>
+        <div class="col-xs-4">
+          <ul id="userlist"></ul>
         </div>
       </div>
       <!-- /.row -->
 
       <div class="row">
         <div class="form-group">
-          <div class="col-xs-6">
+          <div class="col-xs-4">
             <input id="text" class="form-control" type="text" placeholder="Send a message..." disabled=""/>
           </div>
-          <div class="col-xs-6">
+          <div class="col-xs-4">
             <button id="send" class="btn btn-primary" disabled="">Send</button>
             <button id="disconnect" class="btn btn-default" disabled="">Disconnect</button>
           </div>
@@ -85,7 +78,7 @@
       <!-- /.row -->
 
       <div class="row">
-        <div class="col-xs-offset-3 col-xs-6 text-center">
+        <div class="col-xs-6">
           <footer class="footer">
             <p>&copy; <a href="https://github.com/jordan-r-smith">Jordan Smith</a></p>
           </footer>

@@ -8,10 +8,42 @@ new function() {
     $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
   }
 
+  var addUser = function(user) {
+    $('#userlist').append('<li class="list-group-item">' + user + '</li>');
+  }
+
+  var updateUserList = function(userlist) {
+    $('#userlist').html('');
+    for (var user in userlist) {
+      if (userlist.hasOwnProperty(user)) {
+        addUser(userlist[user]);
+      }
+    }
+  }
+
+  var close = function() {
+    if (socket) {
+      console.log('Closing...');
+      socket.close();
+    }
+  }
+
+  var disconnect = function() {
+    $('#username').prop('disabled', false);
+    $('#connect').prop('disabled', false);
+
+    $('#text').prop('disabled', true);
+    $('#send').prop('disabled', true);
+    $('#disconnect').prop('disabled', true);
+
+    close();
+  }
+
   var connect = function() {
     host = 'ws://localhost:8080/server.rb?username=' + username;
 
     try {
+      console.log('Connecting...');
       socket = new WebSocket(host);
     } catch (exception) {
       message('<p class="warning">Error: ' + exception + '</p>');
@@ -22,9 +54,7 @@ new function() {
     socket.onclose = onClose;
   }
 
-  var onOpen = function() {
-    message('<p class="event">ReadyState: ' + socket.readyState + '</p>');
-  }
+  var onOpen = function() {}
 
   var onMessage = function(event) {
     var msg = JSON.parse(event.data);
@@ -33,11 +63,18 @@ new function() {
 
     switch (msg.type) {
       case 'connect':
+        updateUserList(msg.userlist);
+
         if (username == msg.username) {
           message('<p class="event">You connected.</p>');
         } else {
-          message('<p class="event">' + msg.text + '</p>');
+          message('<p class="event">' + msg.username + ' connected!</p>');
         }
+
+        break;
+      case 'username_taken':
+        message('<p class="event">Username is taken.</p>');
+        disconnect();
         break;
       case 'chat':
         if (username == msg.username) {
@@ -45,8 +82,11 @@ new function() {
         } else {
           message('<p class="message"><em>[' + time + '] ' + msg.username + ' ></em> ' + msg.text + '</p>');
         }
+
         break;
       case 'disconnect':
+        updateUserList(msg.userlist);
+
         if (username == msg.username) {
           message('<p class="event">Disconnected.</p>');
         } else {
@@ -54,43 +94,25 @@ new function() {
         }
         break;
     }
-
-    // Maybe unnecessary?
-    $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
   }
 
   var onClose = function(event) {
-    message('<p class="event">Disconnected.</p>');
-    message('<p class="event">ReadyState: ' + socket.readyState + '</p>');
-    console.log(socket);
-    console.log("code: " + event.code + ", reason: " + event.reason + ", wasClean: " + event.wasClean);
+    $('#userlist').html('');
   }
 
   var send = function(msg) {
     try {
-      if (socket.readyState == WebSocket.OPEN) {
+      if (socket && socket.readyState == WebSocket.OPEN) {
         socket.send(msg);
       }
     } catch (exception) {
       message('<p class="warning">Error: ' + exception + '</p>');
     }
 
-    $('#text').val("");
-  }
-
-  var close = function() {
-    if (socket) {
-      console.log('Closing...');
-      socket.close();
-    }
-    console.log('after close: ');
-    console.log(socket);
+    $('#text').val('');
   }
 
   var chat = function() {
-    console.log('Before chat: ');
-    console.log(socket);
-    //var username = $('#username').val();
     var text = $('#text').val();
 
     if (text == "") {
@@ -106,26 +128,6 @@ new function() {
 
     msg = JSON.stringify(msg);
     send(msg);
-  }
-
-  var disconnect = function() {
-    //var username = $('#username').val();
-    var msg = {
-      type: 'disconnect',
-      username: username
-    }
-
-    msg = JSON.stringify(msg);
-    send(msg);
-
-    $('#username').prop('disabled', false);
-    $('#connect').prop('disabled', false);
-
-    $('#text').prop('disabled', true);
-    $('#send').prop('disabled', true);
-    $('#disconnect').prop('disabled', true);
-
-    close();
   }
 
   var login = function() {
@@ -184,11 +186,6 @@ new function() {
     $('#disconnect').click(function() {
       disconnect();
     });
-
-    // Disconnect on window refresh or close
-    window.onbeforeunload = function() {
-      disconnect();
-    }
   }
 
   WebSocketClient = {
@@ -198,7 +195,6 @@ new function() {
   }
 
 }
-
 
 $(document).ready(function() {
   // User has websockets?
