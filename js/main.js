@@ -73,6 +73,7 @@ new function() {
 
         break;
       case 'username_taken':
+        $('#username').parent().parent().addClass('has-error');
         message('<p class="event">Username is taken.</p>');
         disconnect();
         break;
@@ -134,14 +135,10 @@ new function() {
     username = $('#username').val();
 
     if (username == "") {
-      $('#username').css({
-        "border": "1px solid red"
-      });
+      $('#username').parent().parent().addClass('has-error');
     } else {
       try {
-        $('#username').css({
-          "border": "1px solid #dddddd"
-        });
+        $('#username').parent().parent().removeClass('has-error');
 
         $('#username').prop('disabled', true);
         $('#connect').prop('disabled', true);
